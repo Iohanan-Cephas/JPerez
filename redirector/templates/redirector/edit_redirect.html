@@ -1,0 +1,23 @@
+{% extends "redirector/base.html" %}
+
+{% block title %}Editar Redirect{% endblock %}
+
+{% block content %}
+<a href="{% url 'home' %}" 
+   class="inline-block mb-4 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+   ← Voltar
+</a>
+
+<h2 class="text-xl font-semibold mb-4">Editar Redirect: {{ redirect.slug }}</h2>
+
+<!-- Formulário de edição -->
+<form method="POST" class="grid grid-cols-1 gap-4">
+  {% csrf_token %}
+  <label class="font-medium">URL de destino</label>
+  <input type="url" name="target_url" value="{{ redirect.target_url }}" 
+         class="border rounded p-2 w-full" required>
+  <button type="submit" class="bg-yellow-600 text-white p-2 rounded hover:bg-yellow-700 transition">
+      Salvar
+  </button>
+</form>
+{% endblock %}

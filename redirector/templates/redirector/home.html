@@ -1,0 +1,104 @@
+{% extends 'redirector/base.html' %}
+
+{% block title %}Painel - Redirector{% endblock %}
+
+{% block content %}
+{% if messages %}
+<div class="my-4">
+  {% for message in messages %}
+    <div 
+      class="p-2 mb-2 rounded 
+      {% if message.tags == 'error' %}bg-red-200 text-red-800
+      {% elif message.tags == 'success' %}bg-green-200 text-green-800
+      {% else %}bg-blue-200 text-blue-800{% endif %}">
+      {{ message }}
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<h2 class="text-xl font-semibold mb-6">Painel de Redirecionamentos</h2>
+
+<!-- Formulário de criação -->
+<div class="bg-white p-6 rounded shadow mb-8">
+  <form method="POST" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {% csrf_token %}
+    <input type="text" name="slug" placeholder="Slug" class="border rounded p-2 w-full" required>
+    <input type="url" name="target_url" placeholder="URL de destino" class="border rounded p-2 w-full" required>
+    <button type="submit" class="bg-blue-600 text-white rounded p-2 hover:bg-blue-700 transition">
+      Criar
+    </button>
+  </form>
+</div>
+
+<!-- Tabela de redirecionamentos -->
+<div class="bg-white p-6 rounded shadow overflow-x-auto">
+  <table class="min-w-full table-auto border-collapse border border-gray-200">
+    <thead class="bg-gray-200">
+      <tr>
+        <th class="border px-4 py-2 text-left">Slug</th>
+        <th class="border px-4 py-2 text-left">Target URL</th>
+        <th class="border px-4 py-2">QR Code</th>
+        <th class="border px-4 py-2">Cliques</th>
+        <th class="border px-4 py-2">Último Acesso</th>
+        <th class="border px-4 py-2">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for redirect in redirects %}
+      <tr class="hover:bg-gray-50">
+        <td class="border px-4 py-2">{{ redirect.slug }}</td>
+        <td class="border px-4 py-2 text-blue-600 underline">
+          <a href="{{ redirect.target_url }}" target="_blank">{{ redirect.target_url }}</a>
+        </td>
+        <td class="border px-4 py-2 text-center">
+          {% if redirect.qr_code %}
+            <img src="{{ redirect.qr_code.url }}" class="w-20 h-20 mx-auto cursor-pointer"
+                 alt="QR Code" onclick="openModal('{{ redirect.qr_code.url }}')">
+          {% else %}
+            -
+          {% endif %}
+        </td>
+        <td class="border px-4 py-2 text-center">{{ redirect.clicks }}</td>
+        <td class="border px-4 py-2 text-center">
+          {{ redirect.last_access|default:"-" }}
+        </td>
+        <td class="border px-4 py-2 text-center space-x-2">
+          <a href="{% url 'edit_redirect' redirect.id %}" class="text-yellow-600 hover:underline">✏️ Editar</a>
+          {% if redirect.qr_code %}
+            <a href="{{ redirect.qr_code.url }}" download class="text-green-600 hover:underline">📥 QR</a>
+          {% endif %}
+          <a href="{% url 'delete_redirect' redirect.id %}" class="text-red-600 hover:underline">❌ Deletar</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center p-4">Nenhum redirecionamento cadastrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal do QR Code -->
+<div id="qrModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+  <div class="bg-white p-4 rounded shadow-lg relative">
+    <span class="absolute top-2 right-3 cursor-pointer text-xl font-bold" onclick="closeModal()">&times;</span>
+    <img id="modalImg" src="" class="max-w-xs md:max-w-md">
+  </div>
+</div>
+
+<!-- Script para abrir/fechar modal -->
+<script>
+function openModal(url) {
+    document.getElementById('modalImg').src = url;
+    document.getElementById('qrModal').classList.remove('hidden');
+    document.getElementById('qrModal').classList.add('flex');
+}
+
+function closeModal() {
+    document.getElementById('qrModal').classList.remove('flex');
+    document.getElementById('qrModal').classList.add('hidden');
+}
+</script>
+{% endblock %}
