@@ -7,6 +7,8 @@ name = "pypi"
 django = "*"
 psycopg2-binary = "*"
 python-dotenv = "*"
+pillow = "*"
+qrcode = {extras = ["pil"], version = "*"}
 
 [dev-packages]
 
