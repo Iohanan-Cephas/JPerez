@@ -1,10 +1,10 @@
 from django.urls import path
 
-from .views import home, redirect_slug, edit_redirect, delete_redirect
+from .views import HomeView, RedirectSlugView, EditRedirectView, DeleteRedirectView
 
 urlpatterns =[
-    path('', home, name='home'),
-    path('r/<slug:slug>/', redirect_slug, name='redirect'),
-    path('edit/<int:id>/', edit_redirect, name='edit_redirect'),
-    path('delete/<int:id>/', delete_redirect, name='delete_redirect'),
+    path('', HomeView.as_view(), name='home'),
+    path('r/<slug:slug>/', RedirectSlugView.as_view(), name='redirect'),
+    path('edit/<int:id>/', EditRedirectView.as_view(), name='edit_redirect'),
+    path('delete/<int:id>/', DeleteRedirectView.as_view(), name='delete_redirect'),
 ]

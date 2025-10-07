@@ -4,6 +4,7 @@ from django.core.files.base import ContentFile
 from django.utils import timezone
 from django.contrib import messages
 from django.db import IntegrityError
+from django.views import View
 
 from .models import Redirect
 
@@ -16,8 +17,12 @@ import qrcode
 # def home(request):
 #     return render(request, 'home.html')
 
-def home(request):
-    if request.method == 'POST':
+class HomeView(View):
+    def get(self, request):
+        redirects = Redirect.objects.all()
+        return render(request, 'redirector/home.html', {'redirects': redirects})
+
+    def post(self, request):
         slug = request.POST.get('slug')
         if Redirect.objects.filter(slug=slug).exists():
             messages.error(request, f'O slug "{slug}" já existe!')
@@ -34,28 +39,28 @@ def home(request):
 
         redirect_obj.save()
         return redirect('home')
-    
-    redirects = Redirect.objects.all()
-    return render(request, 'redirector/home.html', {'redirects': redirects})
 
-def redirect_slug(request, slug):
-    redirect_obj = get_object_or_404(Redirect, slug=slug)
-    redirect_obj.clicks += 1
-    redirect_obj.last_access = timezone.now()
-    redirect_obj.save()
-    return HttpResponseRedirect(redirect_obj.target_url)
+class RedirectSlugView(View):
+    def redirect_slug(self, request, slug):
+        redirect_obj = get_object_or_404(Redirect, slug=slug)
+        redirect_obj.clicks += 1
+        redirect_obj.last_access = timezone.now()
+        redirect_obj.save()
+        return HttpResponseRedirect(redirect_obj.target_url)
 
-def edit_redirect(request, id):
-    redirect_obj = get_object_or_404(Redirect, id=id)
+class EditRedirectView(View):
+    def get(self, request, id):
+        redirect_obj = get_object_or_404(Redirect, id=id)
+        return render(request, 'redirector/edit_redirect.html', {'redirect': redirect_obj})
 
-    if request.method == 'POST':
+    def post(self, request, id):
+        redirect_obj = get_object_or_404(Redirect, id=id)
         redirect_obj.target_url = request.POST.get('target_url')
         redirect_obj.save()
         return redirect('home')
-    
-    return render(request, 'redirector/edit_redirect.html', {'redirect': redirect_obj})
 
-def delete_redirect(request, id):
-    redirect_obj = get_object_or_404(Redirect, id=id)
-    redirect_obj.delete()
-    return redirect('home')
+class DeleteRedirectView(View):
+    def post(self, request, id):
+        redirect_obj = get_object_or_404(Redirect, id=id)
+        redirect_obj.delete()
+        return redirect('home')
