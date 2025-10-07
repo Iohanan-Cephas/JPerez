@@ -1,0 +1,33 @@
+{% extends "redirector/base.html" %}
+
+{% block content %}
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-100">
+  <h1 class="text-4xl font-bold mb-8">Redirector</h1>
+
+  <div class="w-full max-w-md bg-white p-6 rounded shadow">
+    <form method="POST" class="flex flex-col gap-4">
+      {% csrf_token %}
+      <input type="text" name="slug" placeholder="Digite o slug" 
+             class="border border-gray-300 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+      <button type="submit" 
+              class="bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600 transition">
+        Ir
+      </button>
+    </form>
+
+    <div class="mt-6">
+      <h2 class="text-xl font-semibold mb-2">Redirecionamentos recentes</h2>
+      <ul class="divide-y divide-gray-200">
+        {% for r in redirects %}
+          <li class="py-2 flex justify-between">
+            <span>{{ r.slug }}</span>
+            <span class="text-gray-500">{{ r.target_url }}</span>
+          </li>
+        {% empty %}
+          <li class="py-2 text-gray-400">Nenhum redirecionamento ainda.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
